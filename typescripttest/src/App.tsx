@@ -1,6 +1,7 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import BlackJack from './components/BlackJack';
 
 function App() {
   return (
@@ -8,6 +9,7 @@ function App() {
         <p>
           TypeScript Test
         </p>
+        <BlackJack />
     </div>
   );
 }
