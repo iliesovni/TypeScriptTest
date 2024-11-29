@@ -5,6 +5,37 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQjEHuHOxWyeF1Y3ey2jrcHGgjkg2tPE6CcOQ&s");
+}
+
+.carte {
+  width: 50px;
+  height: 75px;
+  background-color: white;
+  border-radius: 10px;
+  margin: 5px;
+  display: inline-block;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+span {
+  width: 50px;
+  height: 75px;
+  background-color: white;
+  border-radius: 10px;
+  margin: 5px;
+  display: inline-block;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+p{
+  color: aliceblue;
+}
+
+h3{
+  color: aliceblue;
 }
 
 code {

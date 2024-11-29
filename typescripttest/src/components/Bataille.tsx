@@ -12,11 +12,15 @@ type Joueur = {
     score: number;
     joue?: number;
     jouesigne?: string;
+    brule?: number;
+    brulesigne?: string;
+    rejoue?: number;
+    rejouesigne?: string;
   };
 
 const Bataille: React.FC = () => {
 
-    const signes = ['Trèfle', 'Carreau', 'Coeur', 'Pique'];
+    const signes = ['♣', '♦', '♥', '♠'];
     const chiffres = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]; // 11 c le Valet, 12 la reine, 13 le roi et 14 l'as (fo que je gère ça)
 
     const [deck, setDeck] = useState<Carte[]>([]);
@@ -59,7 +63,16 @@ const Bataille: React.FC = () => {
         bot.joue = carteBot.chiffre;    
         joueur.jouesigne = carteJoueur.signe;
         bot.jouesigne = carteBot.signe;  
+        joueur.brule = 0;
+        joueur.brulesigne = "";
+        bot.brule = 0;
+        bot.brulesigne = "";
+        joueur.rejoue = 0;
+        bot.rejoue = 0;    
+        joueur.rejouesigne = "";
+        bot.rejouesigne = "";  
 
+        //conditions de victoire de manche (si égalité on fait un deuxième round où on prend la première carte des deux decks)
         if (carteJoueur.chiffre > carteBot.chiffre) {
             setJoueur(prevJoueur => ({ ...prevJoueur, main: [...nouvelleMainJoueur, carteJoueur, carteBot] }));
             setBot(prevBot => ({ ...prevBot, main: nouvelleMainBot }));
@@ -72,20 +85,34 @@ const Bataille: React.FC = () => {
             //deuxième round en cas d'égalité (si ya encore égalité c cho 1 peu)
             if (nouvelleMainJoueur.length > 0 && nouvelleMainBot.length > 0) {
                 const carteJoueurSuivante = nouvelleMainJoueur[0];
+                joueur.rejoue = carteJoueurSuivante.chiffre;
+                joueur.rejouesigne = carteJoueurSuivante.signe;
                 const carteBotSuivante = nouvelleMainBot[0];
-                const nouvelleMainJoueurSuivante = nouvelleMainJoueur.slice(1);
-                const nouvelleMainBotSuivante = nouvelleMainBot.slice(1);
+                bot.rejoue = carteBotSuivante.chiffre; 
+                bot.rejouesigne = carteBotSuivante.signe; 
+                const mainjouerprov = nouvelleMainJoueur.slice(1);
+                const mainbotprov = nouvelleMainBot.slice(1);
+    
+
+                const cartebruleejou = mainjouerprov[0];
+                joueur.brule = cartebruleejou.chiffre;
+                joueur.brulesigne = cartebruleejou.signe;
+                const cartebruleebot = mainbotprov[0];
+                bot.brule = cartebruleebot.chiffre;
+                bot.brulesigne = cartebruleebot.signe;
+                const nouvelleMainJoueurSuivante = mainjouerprov.slice(1);
+                const nouvelleMainBotSuivante = mainbotprov.slice(1);
 
                 if (carteJoueurSuivante.chiffre > carteBotSuivante.chiffre) {
-                    setJoueur(prevJoueur => ({ ...prevJoueur, main: [...nouvelleMainJoueurSuivante, carteJoueur, carteBot, carteJoueurSuivante, carteBotSuivante] }));
+                    setJoueur(prevJoueur => ({ ...prevJoueur, main: [...nouvelleMainJoueurSuivante, carteJoueur, carteBot, carteJoueurSuivante, carteBotSuivante, cartebruleejou, cartebruleebot] }));
                     setBot(prevBot => ({ ...prevBot, main: nouvelleMainBotSuivante }));
                     setMessage('Le joueur gagne après égalité');
                 } else if (carteJoueurSuivante.chiffre < carteBotSuivante.chiffre) {
-                    setBot(prevBot => ({ ...prevBot, main: [...nouvelleMainBotSuivante, carteBot, carteJoueur, carteBotSuivante, carteJoueurSuivante] }));
+                    setBot(prevBot => ({ ...prevBot, main: [...nouvelleMainBotSuivante, carteBot, carteJoueur, carteBotSuivante, carteJoueurSuivante, cartebruleejou, cartebruleebot] }));
                     setJoueur(prevJoueur => ({ ...prevJoueur, main: nouvelleMainJoueurSuivante }));
                     setMessage('Le bot gagne après égalité');
                 } else {
-                    setBrule(prevBrule => ({ ...prevBrule, main: [...prevBrule.main, carteJoueur, carteBot, carteJoueurSuivante, carteBotSuivante] }));
+                    setBrule(prevBrule => ({ ...prevBrule, main: [...prevBrule.main, carteJoueur, carteBot, carteJoueurSuivante, carteBotSuivante, cartebruleejou, cartebruleebot] }));
                     setJoueur(prevJoueur => ({ ...prevJoueur, main: nouvelleMainJoueurSuivante }));
                     setBot(prevBot => ({ ...prevBot, main: nouvelleMainBotSuivante }));
                     setMessage('Egalité deux fois');
@@ -104,32 +131,38 @@ const Bataille: React.FC = () => {
             <div>
             {bot.main.slice(0, 5).map((carte, index) => (
                 <span key={index}>
-                    ᔑᓭ|| de {carte.signe}
-                    {index < joueur.main.slice(0, 5).length - 1 ? ', ' : ''}
+                    ᔑᓭ|| {carte.signe}
                 </span>
             ))}
-                <h1>main du bot</h1>
+                <h3>main du bot</h3>
             </div>
             {bot.main.length > 0 && (
                 <span>
-                    {bot.joue} de {bot.jouesigne}
+                    {bot.joue} {bot.jouesigne}
                 </span>
             )}
-            <p>carte bot</p>
             <p>resultat : { message }</p>
-            <p>carte joueur</p>
+            {joueur.brule !== undefined && joueur.brule > 0 && bot.brule !== undefined && bot.brule > 0 && (
+                <p>brulé : joueur : { joueur.brule } { joueur.brulesigne } | bot : { bot.brule } { bot.brulesigne }</p>
+            )}
+            {joueur.rejoue !== undefined && joueur.rejoue > 0 && bot.rejoue !== undefined && bot.rejoue > 0 && (
+                <p>rejoué : joueur : { joueur.rejoue } { joueur.rejouesigne } | bot : { bot.rejoue } { bot.rejouesigne }</p>
+            )}
             {joueur.main.length > 0 && (
                 <span>
-                    {joueur.joue} de {joueur.jouesigne}
+                    {joueur.joue} {joueur.jouesigne}
                 </span>
             )}
             <div>
-                <h1>main du joueur</h1>
+                <h3>main du joueur</h3>
                 {joueur.main.slice(0, 5).map((carte, index) => (
-                    <button key={index} onClick={() => jouerRound(index) } disabled={joueur.main.length === 0 || bot.main.length === 0}>
-                        {carte.chiffre} de {carte.signe}
+                    <button className='carte' key={index} onClick={() => jouerRound(index) } disabled={joueur.main.length === 0 || bot.main.length === 0}>
+                        {carte.chiffre} {carte.signe}
                     </button>
                 ))}
+                {joueur.main.length > 5 && (
+                    <p>carte suivante : { joueur.main[5].chiffre } { joueur.main[5].signe } | {joueur.main.length} cartes restantes</p>
+                )}
             </div>
             <button onClick={deckMelange}>Melanger</button>
         </div>
